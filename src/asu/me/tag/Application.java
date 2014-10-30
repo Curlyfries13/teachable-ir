@@ -15,6 +15,7 @@ public class Application extends PApplet {
 
 	private static byte untracked[][] = new byte[4][2];
 	
+	PointCloud cloud;
 	Calibrate calibrate;
 	OscP5 osc;
 
@@ -43,6 +44,7 @@ public class Application extends PApplet {
 		
 		
 		calibrate = new Calibrate(this);
+		cloud = new PointCloud(calibrate.plane);
 		smooth();
 		
 		values = new HashMap<Integer, MedianList[]>();
@@ -231,8 +233,9 @@ public class Application extends PApplet {
 			
 			double certainty = Double.MAX_VALUE;
 			PVector p;
-			
+				
 			MedianList[] list = values.get(quadrant);
+			
 			if(list == null){
 				list = new MedianList[] {new MedianList(MEDIAM_BUFFER_SIZE), new MedianList(MEDIAM_BUFFER_SIZE)};
 			}
@@ -240,23 +243,18 @@ public class Application extends PApplet {
 			if(_x >= 1 || _y >= 1){
 				// TODO handle untracked IR sources
 				//System.out.println("UNTRACKED " + type + " " + id);
+				//if the untracked buffer value hasn't been reached we increment the buffer counter.	
 				if(untracked[quadrant][id] < UNTRACKED_BUFFER_VAL){
 					list[id].drop(MedianList.X);
 					list[id].drop(MedianList.Y);
+					//untracked increments; bad values cause a buffer zone to grow
 					untracked[quadrant][id]++;
 				}
 				return;
-				/*
-				p = new PVector(l[id-1].getLast(MedianList.X), l[id-1].getLast(MedianList.Y));
-				l[id-1].add(_x, MedianList.X);
-				l[id-1].add(_y, MedianList.Y);
-			*/
-			} 
+			}
+			//untracked buffer zone is clear, good to read values now.
 			else if(untracked[quadrant][id] <= 0){
 				untracked[quadrant][id] = 0;
-				//check to see if the pattern makes sense
-				//if the pattern is too big, then try dropping values to get rid of the problem
-				
 				//good (probably) value
 				list[id].add(_x, MedianList.X);
 				list[id].add(_y, MedianList.Y);
@@ -265,18 +263,20 @@ public class Application extends PApplet {
 				
 				// Calculating certainty
 				certainty = Math.sqrt(Math.pow(_x - 0.5, 2) + Math.pow(_y - 0.5, 2)); 
+				
+				//DEBUG
 				//System.out.print (type + " ");
 				//System.out.println(_x + "," + _y);
 				//System.out.println("c: " + c);
 				p = mapIRPoint(_x, _y);
 			
-			// Setting the quadrant current position
-			ir_points[quadrant][id-1] = p;
-			// Drawing current point on calibration panel
-			calibrate.drawCurrentLocation(ir_points[quadrant], quadrant, id, certainty);
-			return;
+				// Setting the quadrant current position
+				ir_points[quadrant][id-1] = p;
+				// Drawing current point on calibration panel
+				calibrate.drawCurrentLocation(ir_points[quadrant], quadrant, id, certainty);
+				return;
 			}
-			//buffer area, ignoring values for now
+			//buffer area, ignoring values for now as they may not be valid yet.
 			else{
 				untracked[quadrant][id]--;
 				return;

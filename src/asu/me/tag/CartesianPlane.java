@@ -16,6 +16,7 @@ public class CartesianPlane {
 	private float orientationDelta = 0;
 	List<Float> previousAngles = new ArrayList<Float>();
 	private static final int MEDIAM_BUFFER_SIZE = 100;
+	private PointCloud cloud;
 	
 	
 	
@@ -23,6 +24,7 @@ public class CartesianPlane {
 		this.quadrants = quadrants;
 		this.width = width;
 		this.height = height;
+		cloud = new PointCloud(this);
 	}
 	
 	public int getCurrentQuadrant(){
@@ -31,8 +33,12 @@ public class CartesianPlane {
 	
 	public PVector[] getCurrentPoint(){
 		Quadrant current = quadrants[currentQuadrant];
+		double currentCertainty, checkCertainty;
 		for (int i = 0; i < 3; i++) {
-			if((current.certainty) >= (quadrants[i].certainty)){
+			currentCertainty = (current.certainty[0] + current.certainty[1])/2;
+			checkCertainty = (quadrants[i].certainty[0] + quadrants[i].certainty[1])/2;
+			
+			if(currentCertainty >= checkCertainty){
 				current = quadrants[i];
 				currentQuadrant = i;
 			}
@@ -47,7 +53,9 @@ public class CartesianPlane {
 		PVector[] point = getCurrentPoint(); // TODO
 //		float x = PApplet.map(point.x, width/2, width, -5, 5);
 //		float y = PApplet.map(point.y, height, 0, -5, 5);
-		return new PVector[]{q.mapPoint(point[0]), q.mapPoint(point[1])};
+		//return new PVector[]{q.mapPoint(point[0]), q.mapPoint(point[1])};
+		cloud.fetchPoints();
+		return cloud.getPoints();
 	}
 	
 	// Same as 'getCurrentTransformedPoint()', but returning result as array
@@ -59,6 +67,19 @@ public class CartesianPlane {
 		
 		float[] ret = { x, y };
 		return ret;
+	}
+	
+	public PVector[] getQuadrantPoints(int quadrant){
+		return new PVector[]{quadrants[quadrant].mapPoint(quadrants[quadrant].currentPoint[0]),
+				quadrants[quadrant].mapPoint(quadrants[quadrant].currentPoint[1])};
+	}
+	
+	public double getQuadrantCertainty(int quadrant){
+		if(quadrants[quadrant].certainty[0] != Double.MAX_VALUE && quadrants[quadrant].certainty[1] != Double.MAX_VALUE){
+			return (quadrants[quadrant].certainty[0]+quadrants[quadrant].certainty[1])/2;
+		}
+		else
+			return Double.MAX_VALUE;
 	}
 	
 	public float getCurrentOrientation(){

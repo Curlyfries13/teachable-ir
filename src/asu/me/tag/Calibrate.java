@@ -165,10 +165,7 @@ public class Calibrate {
         }
         //display length reading
         parent.text(quadrant + ": " + distance, 0, y);
-        
-        //check if the line is too large
-        if(distance > 55);
-        certainty = 1000;
+
 //>>>>>>> FETCH_HEAD
 		
 //		if(p.x != Application.OUT_OF_BOUNDS && p.y != Application.OUT_OF_BOUNDS){
@@ -183,7 +180,10 @@ public class Calibrate {
 		if(calibrationStage == CalibrationStage.COMPLETE){
 //			PVector point = quadrants[quadrant-1].mapPoint(ir_points);
 			quadrants[quadrant-1].currentPoint = ir_points;
-			quadrants[quadrant-1].certainty = certainty;
+			if(distance > 55)
+				quadrants[quadrant-1].certainty[id] = Double.MAX_VALUE;
+			else
+				quadrants[quadrant-1].certainty[id] = certainty;
 //			parent.ellipse(point.x, point.y, 10, 10);
 			
 			//DEBUG

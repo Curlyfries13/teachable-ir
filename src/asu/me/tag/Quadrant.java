@@ -29,11 +29,12 @@ public abstract class Quadrant {
 	public PVector[] points;
 	public PVector[] boundaryPoints;
 	public PerspectiveTransform transform;
-	public double certainty;
+	public double[] certainty;
 	
 	public Quadrant(){
 		points = new PVector[4];
 		currentPoint = new PVector[]{new PVector(0,0), new PVector(0,0)};
+		certainty = new double[2];
 	}
 	
 	public void setCenterPoint(PVector point){
