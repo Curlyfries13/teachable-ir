@@ -15,7 +15,6 @@ public class Application extends PApplet {
 
 	private static byte untracked[][] = new byte[4][2];
 	
-	PointCloud cloud;
 	Calibrate calibrate;
 	OscP5 osc;
 
@@ -44,7 +43,6 @@ public class Application extends PApplet {
 		
 		
 		calibrate = new Calibrate(this);
-		cloud = new PointCloud(calibrate.plane);
 		smooth();
 		
 		values = new HashMap<Integer, MedianList[]>();
